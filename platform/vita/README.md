@@ -55,6 +55,26 @@ transporte de uniforms validado → ColorRect/textura/Label → runtime interati
 Para o binding, o teste em `tools/tests/test_vitagl_ubo_binding.py` é apenas
 uma guarda de presença da atribuição no código-fonte; não substitui o probe.
 
+### Testes no host
+
+`tools/run_tests.sh` compila e executa todos os testes de `tools/tests/`
+(Python e C/C++). Precisa apenas de Python 3 e de um compilador C/C++; não usa
+VitaSDK, editor nem console. O CI executa o mesmo script
+(`.github/workflows/godot4vita_host_tests.yml`).
+
+```bash
+platform/vita/tools/run_tests.sh
+```
+
+`test_editor_vpk.py` e `test_verify_runtime.py` usam o
+`examples/vita_export/Exemplo.vpk` do repositório. Os testes que dependem de
+entradas externas são pulados com aviso: `test_vitagl_ubo_binding.py` precisa
+de `VITAGL_SRC` (checkout da VitaGL com o patch), `test_trophy_trp.py` precisa
+da saída de `tools/test_trophy_export.py` e do Pillow. `VITA_RUNTIME_SO`
+substitui o `libgodot.so` usado por `test_verify_runtime.py`. Esses testes não
+provam nada sobre o console: GPU, compilador de shaders e SDK são simulados ou
+ignorados.
+
 ## Limites
 
 O port não implementa um driver GLES3 completo. A compilação de shaders e os

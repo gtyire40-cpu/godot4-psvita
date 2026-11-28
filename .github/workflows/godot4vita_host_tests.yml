@@ -1,0 +1,39 @@
+name: Godot4Vita host tests
+
+# Runs the Vita port's host-side tests (platform/vita/tools/run_tests.sh).
+# They need only Python and a C/C++ compiler: no VitaSDK, editor or console.
+on:
+  push:
+    paths:
+      - 'platform/vita/**'
+      - 'drivers/gles3/shader_gles3.cpp'
+      - 'drivers/gles3/shaders/**'
+      - 'modules/vita_editor/**'
+      - 'examples/vita_export/**'
+      - '.github/workflows/godot4vita_host_tests.yml'
+  pull_request:
+    paths:
+      - 'platform/vita/**'
+      - 'drivers/gles3/shader_gles3.cpp'
+      - 'drivers/gles3/shaders/**'
+      - 'modules/vita_editor/**'
+      - 'examples/vita_export/**'
+      - '.github/workflows/godot4vita_host_tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run host tests
+        run: platform/vita/tools/run_tests.sh

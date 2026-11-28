@@ -397,32 +397,17 @@ $RECYCLE.BIN/
 *.lnk
 *.generated.props
 
-# --- godot4-vita: build artifacts (do not commit) ---
-/bin/
-*.o
-*.os
-*.obj
-*.a
-*.so
+###########################
+### godot4-vita specific ###
+###########################
+
+# Vita build output (object files, *.so, bin/, *.gen.* and SCons/Python
+# caches are already covered above)
 *.velf
 *.self
-*.gen.h
-*.sconsign*.dblite
-.sconsign.dblite
-__pycache__/
-*.pyc
 platform/vita/tools/libvcp/build/
-platform/vita/tools/libvcp/**/*.o
-# keep the preview VPK but ignore stray build VPKs elsewhere
+# Keep the preview VPK in dist/ but ignore build VPKs from the loader
 platform/vita/loader/*.vpk
-platform/vita/loader/libgodot.so
-
-# godot4-vita: drop upstream Godot CI workflows (need 'workflow' token scope)
-.github/workflows/
-!.github/
-!.github/workflows/
-.github/workflows/*
-!.github/workflows/godot4vita_editor_multiplatform.yml
 
 # Vita native probe / CMake intermediates (rebuildable)
 platform/vita/tools/**/build-*/
@@ -430,3 +415,7 @@ platform/vita/tools/**/CMakeFiles/
 platform/vita/tests/**/.godot/
 platform/vita/demo_assets/**/frame_manifest.json.bak
 
+# Upstream Godot CI workflows are dropped (pushing them needs the 'workflow'
+# token scope); only the godot4vita_* workflows are tracked.
+.github/workflows/*
+!.github/workflows/godot4vita_*.yml
