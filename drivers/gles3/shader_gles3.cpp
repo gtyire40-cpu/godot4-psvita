@@ -46,7 +46,9 @@ static void vita_trace_shader(const char *p_stage, const char *p_name, const cha
 #ifdef GLES3_ENABLED
 
 #include "core/io/dir_access.h"
+#include "core/os/mutex.h"
 #include "core/string/string_builder.h"
+#include "core/templates/hash_set.h"
 #include "drivers/gles3/rasterizer_util_gles3.h"
 #include "drivers/gles3/storage/config.h"
 
@@ -651,6 +653,33 @@ static String _vita_downemit(const String &p_code, bool p_fragment) {
 
 	return preamble + c;
 }
+
+// floatBitsToUint/floatBitsToInt are stubbed to 0 by _vita_downemit(). The
+// stdlib pack* helpers that call them are dead for the canvas, but two cases
+// silently get wrong results: the GPU particle shaders (their flags read as 0,
+// so no particle is ever active) and material code that calls them. Warn once
+// per shader instead of failing silently.
+static void _vita_warn_bit_casts(const String &p_shader, const HashMap<StringName, CharString> &p_code_sections) {
+	static Mutex mutex;
+	static HashSet<String> warned;
+	MutexLock lock(mutex);
+
+	if (p_shader.begins_with("Particles") && !warned.has(p_shader)) {
+		warned.insert(p_shader);
+		WARN_PRINT(vformat("PS Vita: %s relies on floatBitsToUint, which is stubbed to 0 on this platform, so GPU particles will not render correctly. Use CPUParticles2D/CPUParticles3D instead.", p_shader));
+	}
+	for (const KeyValue<StringName, CharString> &E : p_code_sections) {
+		const String code = String::utf8(E.value.get_data());
+		if (!code.contains("floatBitsToUint") && !code.contains("floatBitsToInt")) {
+			continue;
+		}
+		const String key = p_shader + ":" + itos(code.hash());
+		if (!warned.has(key)) {
+			warned.insert(key);
+			WARN_PRINT(vformat("PS Vita: a %s material uses floatBitsToUint/floatBitsToInt in its %s code; both are stubbed to 0 on this platform and always return 0.", p_shader, String(E.key)));
+		}
+	}
+}
 #endif // VITA_ENABLED
 
 void ShaderGLES3::_build_variant_code(StringBuilder &builder, uint32_t p_variant, const Version *p_version, StageType p_stage_type, uint64_t p_specialization) {
@@ -805,6 +834,10 @@ void ShaderGLES3::_compile_specialization(Version::Specialization &spec, uint32_
 	spec.id = glCreateProgram();
 	spec.ok = false;
 	GLint status;
+
+#ifdef VITA_ENABLED
+	_vita_warn_bit_casts(name, p_version->code_sections);
+#endif
 
 	//vertex stage
 	{
