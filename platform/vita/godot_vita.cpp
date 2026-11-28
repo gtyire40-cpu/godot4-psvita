@@ -57,6 +57,13 @@ static void vlog(const char *s) {
 
 #ifdef VITAGL
 #include <vitaGL.h>
+#endif
+
+#if defined(VITAGL) && !defined(VITA_SHARED)
+// Standalone executable build only (vita_shared=no). In the default
+// libgodot.so build newlib's heap belongs to the loader executable, so the
+// size that applies is the one in platform/vita/loader/main.c.
+//
 // Split the ~256 MB app budget: the newlib heap (engine malloc) must NOT eat it
 // all, or vglInit() finds no free RAM for its GXM pools and every GPU buffer
 // allocation fails (glGenBuffers -> 0 -> glBufferData GL_INVALID_OPERATION),

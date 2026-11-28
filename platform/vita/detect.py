@@ -210,6 +210,11 @@ def configure(env: "SConsEnvironment"):
     if env["touch"]:
         env.Append(CPPDEFINES=["TOUCH_ENABLED"])
 
+    # libgodot.so loaded by platform/vita/loader. Process-wide settings such as
+    # _newlib_heap_size_user come from the loader executable in this mode.
+    if env["vita_shared"]:
+        env.Append(CPPDEFINES=["VITA_SHARED"])
+
     env.Append(CPPPATH=["#platform/vita"])
 
     # Several VitaSDK newlib headers (netdb.h, ...) use the C99 `restrict`

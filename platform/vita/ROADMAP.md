@@ -118,6 +118,11 @@ fazem parte necessariamente do repositório distribuído.
    em `godot_vita.cpp`; o executável loader declara 128 MiB em `loader/main.c`.
    Medir o heap efetivo e os pools GXM no caminho `.so`; a alteração do engine
    isoladamente não comprova mudança do heap inicializado pelo executável.
+   *Atualização:* o loader declara hoje 256 MiB, e esse é o valor que vale no
+   build padrão (`vita_shared=yes`), porque o heap do newlib pertence ao
+   executável. A declaração de 96 MiB do engine agora só é compilada com
+   `vita_shared=no` (define `VITA_SHARED`). A medição no aparelho continua
+   pendente.
 6. **P2 — funções GL vazias precisam virar capacidades explícitas.**
    `platform_gl.h` contém no-ops como `glTexStorage2D`, `glClearBufferfv` e
    transform feedback. Auditar chamadas alcançáveis pelo 2D e implementar o
